@@ -1,17 +1,34 @@
-// src/components/ShippingRatesTable.js
 import React from 'react';
 
-const ShippingRatesTable = ({ rates }) => {
-  const serviceMappings = {
-    'Overnight Shipping': 'PRIORITY_OVERNIGHT',
-    'Two-Day Shipping': 'FEDEX_2_DAY',
-    'Three-Day Shipping': 'FEDEX_EXPRESS_SAVER',
-    'Ground Shipping': 'FEDEX_GROUND',
-  };
 
-  const getFedExRate = (serviceType) => {
-    const rate = rates.find(rate => rate.serviceType === serviceType);
-    return rate ? `$${rate.ratedShipmentDetails[0].totalNetCharge}` : '-';
+
+  const ShippingRatesTable = ({ rates }) => {
+    const serviceMappings = [
+    
+    { name: 'Ground Shipping (1-5)', ups: '03', fedex: 'FEDEX_GROUND' },
+    { name: 'Two-Day Shipping', ups: '02', fedex: 'FEDEX_2_DAY' },
+    { name: 'Three-Day Shipping', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER' },
+    { name: 'Overnight Shipping', ups: '01', fedex: 'PRIORITY_OVERNIGHT' }
+    ];
+
+    /*
+    const ShippingRatesTable = ({ rates }) => {
+  const serviceMappings = [
+    { name: 'Next Day Air Early', ups: '14', fedex: 'FIRST_OVERNIGHT' },
+    { name: 'Next Day Air', ups: '01', fedex: 'PRIORITY_OVERNIGHT' },
+    { name: 'Next Day Air Saver', ups: '13', fedex: 'STANDARD_OVERNIGHT' },
+    { name: '2nd Day Air A.M.', ups: '59', fedex: 'FEDEX_2_DAY_AM' },
+    { name: '2nd Day Air', ups: '02', fedex: 'FEDEX_2_DAY' },
+    { name: '3 Day Select', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER' },
+    { name: 'Ground', ups: '03', fedex: 'FEDEX_GROUND' }
+  ];
+  */
+ 
+  const getRate = (carrierRates, serviceType) => {
+    if (carrierRates[serviceType]) {
+      return `$${carrierRates[serviceType]}`;
+    }
+    return '-';
   };
 
   return (
@@ -25,11 +42,11 @@ const ShippingRatesTable = ({ rates }) => {
         </tr>
       </thead>
       <tbody>
-        {Object.keys(serviceMappings).map((service, index) => (
+        {serviceMappings.map((service, index) => (
           <tr key={index}>
-            <td>{service}</td>
-            <td>-</td> {/* Placeholder for UPS rate */}
-            <td>{getFedExRate(serviceMappings[service])}</td>
+            <td>{service.name}</td>
+            <td>{getRate(rates.ups, service.ups)}</td>
+            <td>{getRate(rates.fedex, service.fedex)}</td>
             <td>-</td> {/* Placeholder for USPS rate */}
           </tr>
         ))}
