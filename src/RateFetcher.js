@@ -127,9 +127,9 @@ const RateFetcher = () => {
         length: formData.packageLength,
         width: formData.packageWidth,
         height: formData.packageHeight,
-        package_type: '02' // Assuming '02' as package type, adjust as needed
+        package_type: '02'
       },
-      service_codes: ['14', '01', '13', '59', '02', '12', '03'] // All UPS services
+      service_codes: ['01', '02', '03', '12']
     };
 
     try {
@@ -153,7 +153,7 @@ const RateFetcher = () => {
   };
 
   const fetchRates = async (formData) => {
-    setError(null); // Reset error state before starting new request
+    setError(null);
     try {
       const fedexAccessToken = await getAccessToken('fedex');
       const fedexRateDetails = await getFedExRateQuote(fedexAccessToken, formData);

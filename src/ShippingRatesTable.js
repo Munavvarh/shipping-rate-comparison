@@ -4,9 +4,11 @@ import React from 'react';
 
   const ShippingRatesTable = ({ rates }) => {
     const serviceMappings = [
-      { name: 'Next Day Air Early', ups: '14', fedex: 'FIRST_OVERNIGHT' },
-      { name: '3 Day Select', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER' },
-      { name: 'Ground (1-5)', ups: '03', fedex: 'FEDEX_GROUND' }
+    
+    { name: 'Ground Shipping (1-5)', ups: '03', fedex: 'FEDEX_GROUND' },
+    { name: 'Two-Day Shipping', ups: '02', fedex: 'FEDEX_2_DAY' },
+    { name: 'Three-Day Shipping', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER' },
+    { name: 'Overnight Shipping', ups: '01', fedex: 'PRIORITY_OVERNIGHT' }
     ];
 
     /*
