@@ -1,29 +1,29 @@
-// src/RateFetcher.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import PackageForm from './PackageForm';
 import ShippingRatesTable from './ShippingRatesTable';
 
 const RateFetcher = () => {
-  const [rates, setRates] = useState([]);
+  const [rates, setRates] = useState({ fedex: {}, ups: {} });
   const [error, setError] = useState(null);
 
-  const getAccessToken = async () => {
+  const getAccessToken = async (carrier) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/fedex/token');
+      const method = carrier === 'ups' ? 'get' : 'post';
+      const response = await axios[method](`http://127.0.0.1:5000/${carrier}/token`);
       const accessToken = response.data.access_token;
       if (!accessToken) {
-        throw new Error('Failed to retrieve FedEx access token');
+        throw new Error(`Failed to retrieve ${carrier.toUpperCase()} access token`);
       }
       return accessToken;
     } catch (error) {
-      console.error('Error fetching access token:', error.response?.data || error.message);
-      setError(error.response?.data?.message || 'Failed to retrieve FedEx access token');
+      console.error(`Error fetching ${carrier} access token:`, error.response?.data || error.message);
+      setError(error.response?.data?.message || `Failed to retrieve ${carrier.toUpperCase()} access token`);
       throw error;
     }
   };
 
-  const getRateQuote = async (accessToken, formData) => {
+  const getFedExRateQuote = async (accessToken, formData) => {
     const payload = {
       accountNumber: { value: '740561073' },
       rateRequestControlParameters: { returnTransitTimes: true },
@@ -76,14 +76,78 @@ const RateFetcher = () => {
       );
 
       if (response.data.output && response.data.output.rateReplyDetails) {
-        return response.data.output.rateReplyDetails;
+        const rateDetails = response.data.output.rateReplyDetails.reduce((acc, detail) => {
+          acc[detail.serviceType] = detail.ratedShipmentDetails[0].totalNetCharge;
+          return acc;
+        }, {});
+        return rateDetails;
       } else {
         setError('No rate details found');
-        return [];
+        return {};
       }
     } catch (error) {
-      console.error('Error fetching rate quotes:', error.response?.data || error.message);
-      setError(error.response?.data?.message || 'Failed to fetch rate quotes');
+      console.error('Error fetching FedEx rate quotes:', error.response?.data || error.message);
+      setError(error.response?.data?.message || 'Failed to fetch FedEx rate quotes');
+      throw error;
+    }
+  };
+
+  const getUPSRateQuote = async (accessToken, formData) => {
+    const payload = {
+      shipper_info: {
+        account_number: 'J0469H',
+        name: 'Shipper',
+        address1: formData.originStreet,
+        address2: formData.originApt,
+        city: formData.originCity,
+        state: formData.originState,
+        zip: formData.originZip,
+        country: 'US'
+      },
+      from_address_info: {
+        name: 'Shipper',
+        address1: formData.originStreet,
+        address2: formData.originApt,
+        city: formData.originCity,
+        state: formData.originState,
+        zip: formData.originZip,
+        country: 'US'
+      },
+      to_address_info: {
+        name: 'Recipient',
+        address1: formData.destStreet,
+        address2: formData.destApt,
+        city: formData.destCity,
+        state: formData.destState,
+        zip: formData.destZip,
+        country: 'US'
+      },
+      package_info: {
+        Weight: formData.weight,
+        length: formData.packageLength,
+        width: formData.packageWidth,
+        height: formData.packageHeight,
+        package_type: '02' // Assuming '02' as package type, adjust as needed
+      },
+      service_codes: ['14', '01', '13', '59', '02', '12', '03'] // All UPS services
+    };
+
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:5000/ups/shipping-cost',
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return response.data.total_charges || {};
+    } catch (error) {
+      console.error('Error fetching UPS rate quotes:', error.response?.data || error.message);
+      setError(error.response?.data?.message || 'Failed to fetch UPS rate quotes');
       throw error;
     }
   };
@@ -91,9 +155,13 @@ const RateFetcher = () => {
   const fetchRates = async (formData) => {
     setError(null); // Reset error state before starting new request
     try {
-      const accessToken = await getAccessToken();
-      const rateDetails = await getRateQuote(accessToken, formData);
-      setRates(rateDetails);
+      const fedexAccessToken = await getAccessToken('fedex');
+      const fedexRateDetails = await getFedExRateQuote(fedexAccessToken, formData);
+
+      const upsAccessToken = await getAccessToken('ups');
+      const upsRateDetails = await getUPSRateQuote(upsAccessToken, formData);
+
+      setRates({ fedex: fedexRateDetails, ups: upsRateDetails });
     } catch (error) {
       // The error is already handled in the getAccessToken or getRateQuote function
     }
@@ -103,7 +171,7 @@ const RateFetcher = () => {
     <div>
       <PackageForm onSubmit={fetchRates} />
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {rates.length > 0 && (
+      {(Object.keys(rates.fedex).length > 0 || Object.keys(rates.ups).length > 0) && (
         <ShippingRatesTable rates={rates} />
       )}
     </div>
