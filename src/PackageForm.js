@@ -43,6 +43,12 @@ const PackageForm = ({ onSubmit }) => {
         </select>
       </div>
 
+      <h3>Package Details</h3>
+      <input type="text" name="packageLength" placeholder="Please enter the length of the package (IN)" onChange={handleChange} />
+      <input type="text" name="packageWidth" placeholder="Please enter the width of the package (IN)" onChange={handleChange} />
+      <input type="text" name="packageHeight" placeholder="Please enter the height of the package (IN)" onChange={handleChange} />
+      <input type="text" name="weight" placeholder="Enter the weight of the package (LB)" onChange={handleChange} />
+      
       <h3>Destination Address</h3>
       <input type="text" name="destStreet" placeholder="Street address or P.O. Box" onChange={handleChange} />
       <input type="text" name="destApt" placeholder="Apt, suite, unit, building, floor, etc." onChange={handleChange} />
@@ -53,12 +59,8 @@ const PackageForm = ({ onSubmit }) => {
           {states.map(state => <option key={state} value={state}>{state}</option>)}
         </select>
       </div>
-
-      <h3>Package Details</h3>
-      <input type="text" name="packageLength" placeholder="Please enter the length of the package" onChange={handleChange} />
-      <input type="text" name="packageWidth" placeholder="Please enter the width of the package" onChange={handleChange} />
-      <input type="text" name="packageHeight" placeholder="Please enter the height of the package" onChange={handleChange} />
-      <input type="text" name="weight" placeholder="Enter the weight of the package" onChange={handleChange} />
+      
+      
       <button type="submit">Compare Rates</button>
     </form>
   );

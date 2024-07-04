@@ -6,8 +6,8 @@ import React from 'react';
     const serviceMappings = [
     
     { name: 'Ground Shipping (1-5)', ups: '03', fedex: 'FEDEX_GROUND' },
-    { name: 'Two-Day Shipping', ups: '02', fedex: 'FEDEX_2_DAY' },
     { name: 'Three-Day Shipping', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER' },
+    { name: 'Two-Day Shipping', ups: '02', fedex: 'FEDEX_2_DAY' },
     { name: 'Overnight Shipping', ups: '01', fedex: 'PRIORITY_OVERNIGHT' }
     ];
 
