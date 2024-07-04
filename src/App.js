@@ -1,17 +1,18 @@
-// src/App.js
 import React from 'react';
 import './App.css';
+import './index.css';
+import Header from './Header';
+import Footer from './footer';
 import RateFetcher from './RateFetcher';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Shipping Rates Tool</h1>
-      </header>
+      <Header />
       <main>
         <RateFetcher />
       </main>
+      <Footer />
     </div>
   );
 }
