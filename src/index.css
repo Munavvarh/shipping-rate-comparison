@@ -137,3 +137,22 @@ button:hover {
   color: white;
   background-color: #007bff;
 }
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group.has-error input,
+.form-group.has-error select {
+  border-color: red;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9em;
+}
+
+.required {
+  color: red;
+  margin-left: 5px;
+}
