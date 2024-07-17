@@ -1,9 +1,11 @@
 body {
     font-family: Arial, sans-serif;
+    background-color:rgb(59,59,59);
 }
 
 .header {
     
     /*padding: 20px;*/
     text-align: center;
+    background-color:rgb(59,59,59);
 }
