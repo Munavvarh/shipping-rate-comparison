@@ -6,6 +6,7 @@ import ShippingRatesTable from './ShippingRatesTable';
 const RateFetcher = () => {
   const [rates, setRates] = useState({ fedex: {}, ups: {}, usps: {} });
   const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({});
 
   const getAccessToken = async (carrier) => {
     try {
@@ -174,6 +175,7 @@ const RateFetcher = () => {
 
   const fetchRates = async (formData) => {
     setError(null);
+    setFormData(formData); // Save form data to pass to ShippingRatesTable
     try {
       const fedexAccessToken = await getAccessToken('fedex');
       const fedexRateDetails = await getFedExRateQuote(fedexAccessToken, formData);
@@ -203,7 +205,7 @@ const RateFetcher = () => {
       <PackageForm onSubmit={fetchRates} />
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {(Object.keys(rates.fedex).length > 0 || Object.keys(rates.ups).length > 0 || Object.keys(rates.usps).length > 0) && (
-        <ShippingRatesTable rates={rates} />
+        <ShippingRatesTable rates={rates} formData={formData} />
       )}
     </div>
   );

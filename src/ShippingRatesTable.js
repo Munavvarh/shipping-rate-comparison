@@ -1,7 +1,6 @@
-
 import React from 'react';
 
-const ShippingRatesTable = ({ rates }) => {
+const ShippingRatesTable = ({ rates, formData }) => {
   const serviceMappings = [
     { name: 'Ground Shipping (1-5)', ups: '03', fedex: 'FEDEX_GROUND', usps: 'PRIORITY' },
     { name: 'Three-Day Shipping', ups: '12', fedex: 'FEDEX_EXPRESS_SAVER', usps: 'PRIORITY' },
@@ -14,6 +13,21 @@ const ShippingRatesTable = ({ rates }) => {
       return `$${carrierRates[serviceType]}`;
     }
     return '-';
+  };
+
+  const generateUPSUrl = (formData) => {
+    const { originCity, originZip, destCity, destZip } = formData;
+    return `https://wwwapps.ups.com/ctc/request?loc=en_US&origCity=${encodeURIComponent(originCity)}&origPostalCode=${encodeURIComponent(originZip)}&destCity=${encodeURIComponent(destCity)}&destPostalCode=${encodeURIComponent(destZip)}`;
+  };
+
+  const generateFedExUrl = (formData) => {
+    const { originCity, originZip, destCity, destZip } = formData;
+    return `https://www.fedex.com/en-us/shipping/last-minute-rates.html?originCity=${encodeURIComponent(originCity)}&originZip=${encodeURIComponent(originZip)}&destCity=${encodeURIComponent(destCity)}&destZip=${encodeURIComponent(destZip)}`;
+  };
+
+  const generateUSPSUrl = (formData) => {
+    const { originZip, destZip } = formData;
+    return `https://postcalc.usps.com/?Origin=${encodeURIComponent(originZip)}&Destination=${encodeURIComponent(destZip)}`;
   };
 
   return (
@@ -30,9 +44,9 @@ const ShippingRatesTable = ({ rates }) => {
         {serviceMappings.map((service, index) => (
           <tr key={index}>
             <td>{service.name}</td>
-            <td>{getRate(rates.ups, service.ups)}</td>
-            <td>{getRate(rates.fedex, service.fedex)}</td>
-            <td>{getRate(rates.usps, service.usps)}</td>
+            <td className="clickable" onClick={() => window.open(generateUPSUrl(formData), '_blank')}>{getRate(rates.ups, service.ups)}</td>
+            <td className="clickable" onClick={() => window.open(generateFedExUrl(formData), '_blank')}>{getRate(rates.fedex, service.fedex)}</td>
+            <td className="clickable" onClick={() => window.open(generateUSPSUrl(formData), '_blank')}>{getRate(rates.usps, service.usps)}</td>
           </tr>
         ))}
       </tbody>
