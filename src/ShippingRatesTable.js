@@ -17,7 +17,7 @@ const ShippingRatesTable = ({ rates, formData }) => {
 
   const generateUPSUrl = (formData) => {
     const { originCity, originZip, destCity, destZip } = formData;
-    return `https://wwwapps.ups.com/ctc/request?loc=en_US&origCity=${encodeURIComponent(originCity)}&origPostalCode=${encodeURIComponent(originZip)}&destCity=${encodeURIComponent(destCity)}&destPostalCode=${encodeURIComponent(destZip)}`;
+    return `https://wwwapps.ups.com/ctc/request?loc=en_US&origCity=${encodeURIComponent(originCity)}&origZip=${encodeURIComponent(originZip)}&destCity=${encodeURIComponent(destCity)}&destPostalCode=${encodeURIComponent(destZip)}`;
   };
 
   const generateFedExUrl = (formData) => {
