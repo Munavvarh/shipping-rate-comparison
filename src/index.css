@@ -156,3 +156,30 @@ button:hover {
   color: red;
   margin-left: 5px;
 }
+
+.rate-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rate-comparison-table th, .rate-comparison-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.rate-comparison-table th {
+  background-color: #f2f2f2;
+  color: black;
+}
+
+.rate-comparison-table .clickable {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.rate-comparison-table .clickable:hover {
+  background-color: #3498db;
+  color: white;
+}
+

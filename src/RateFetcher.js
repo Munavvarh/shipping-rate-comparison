@@ -4,13 +4,15 @@ import PackageForm from './PackageForm';
 import ShippingRatesTable from './ShippingRatesTable';
 
 const RateFetcher = () => {
-  const [rates, setRates] = useState({ fedex: {}, ups: {} });
+  const [rates, setRates] = useState({ fedex: {}, ups: {}, usps: {} });
   const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({});
 
   const getAccessToken = async (carrier) => {
     try {
-      const method = carrier === 'ups' ? 'get' : 'post';
-      const response = await axios[method](`http://127.0.0.1:5000/${carrier}/token`);
+      const method = carrier === 'fedex' ? 'post' : 'get';
+      const url = carrier === 'usps' ? `http://127.0.0.1:5000/usps/get_token` : `http://127.0.0.1:5000/${carrier}/token`;
+      const response = await axios[method](url);
       const accessToken = response.data.access_token;
       if (!accessToken) {
         throw new Error(`Failed to retrieve ${carrier.toUpperCase()} access token`);
@@ -152,8 +154,28 @@ const RateFetcher = () => {
     }
   };
 
+  const getUSPSRateQuote = async (accessToken, formData, service) => {
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000/usps/get_rates`, {
+        params: {
+          access_token: accessToken,
+          service: service,
+          zip_origination: formData.originZip,
+          zip_destination: formData.destZip,
+          pounds: formData.weight
+        }
+      });
+      return response.data.shipping_rate;
+    } catch (error) {
+      console.error('Error fetching USPS rate quotes:', error.response?.data || error.message);
+      setError(error.response?.data?.message || 'Failed to fetch USPS rate quotes');
+      throw error;
+    }
+  };
+
   const fetchRates = async (formData) => {
     setError(null);
+    setFormData(formData); // Save form data to pass to ShippingRatesTable
     try {
       const fedexAccessToken = await getAccessToken('fedex');
       const fedexRateDetails = await getFedExRateQuote(fedexAccessToken, formData);
@@ -161,7 +183,18 @@ const RateFetcher = () => {
       const upsAccessToken = await getAccessToken('ups');
       const upsRateDetails = await getUPSRateQuote(upsAccessToken, formData);
 
-      setRates({ fedex: fedexRateDetails, ups: upsRateDetails });
+      const uspsAccessToken = await getAccessToken('usps');
+      const uspsPriorityRate = await getUSPSRateQuote(uspsAccessToken, formData, 'PRIORITY');
+      const uspsExpressRate = await getUSPSRateQuote(uspsAccessToken, formData, 'PRIORITY EXPRESS');
+
+      setRates({
+        fedex: fedexRateDetails,
+        ups: upsRateDetails,
+        usps: {
+          PRIORITY: uspsPriorityRate,
+          'PRIORITY EXPRESS': uspsExpressRate
+        }
+      });
     } catch (error) {
       // The error is already handled in the getAccessToken or getRateQuote function
     }
@@ -171,8 +204,8 @@ const RateFetcher = () => {
     <div>
       <PackageForm onSubmit={fetchRates} />
       {error && <p style={{ color: 'red' }}>{error}</p>}
-      {(Object.keys(rates.fedex).length > 0 || Object.keys(rates.ups).length > 0) && (
-        <ShippingRatesTable rates={rates} />
+      {(Object.keys(rates.fedex).length > 0 || Object.keys(rates.ups).length > 0 || Object.keys(rates.usps).length > 0) && (
+        <ShippingRatesTable rates={rates} formData={formData} />
       )}
     </div>
   );
